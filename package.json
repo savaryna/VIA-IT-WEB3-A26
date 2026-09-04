@@ -1,7 +1,7 @@
 {
   "name": "uno",
   "version": "0.0.1",
-  "description": "Uno",
+  "description": "UNO",
   "keywords": [
     "functional",
     "oo",
@@ -9,6 +9,9 @@
   ],
   "license": "ISC",
   "author": "Ole Ildsgaard Hougaard",
+  "contributors": [
+    "Alexandru Tofan"
+  ],
   "type": "module",
   "main": "index.js",
   "scripts": {
