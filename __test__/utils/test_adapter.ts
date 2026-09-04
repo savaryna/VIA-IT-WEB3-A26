@@ -1,4 +1,5 @@
-import { Randomizer, Shuffler, standardRandomizer, standardShuffler } from '../../src/utils/random_utils'
+// oxlint-disable no-unused-vars until an actual implementation is provided
+import { type Randomizer, type Shuffler, standardRandomizer, standardShuffler } from '../../src/utils/random_utils'
 
 // Fix (or import) these types:
 type Card = any
@@ -7,11 +8,9 @@ type Round = any
 type Game = any
 
 //Fill out the empty functions
-export function createInitialDeck(): Deck {
-}
+export function createInitialDeck(): Deck {}
 
-export function createDeckFromMemento(cards: Record<string, string | number>[]): Deck {
-}
+export function createDeckFromMemento(cards: Record<string, string | number>[]): Deck {}
 
 export type HandConfig = {
   players: string[]
@@ -20,16 +19,9 @@ export type HandConfig = {
   cardsPerPlayer?: number
 }
 
-export function createRound({
-    players, 
-    dealer, 
-    shuffler = standardShuffler,
-    cardsPerPlayer = 7
-  }: HandConfig): Round {
-}
+export function createRound({ players, dealer, shuffler = standardShuffler, cardsPerPlayer = 7 }: HandConfig): Round {}
 
-export function createRoundFromMemento(memento: any, shuffler: Shuffler<Card> = standardShuffler): Round {
-}
+export function createRoundFromMemento(memento: any, shuffler: Shuffler<Card> = standardShuffler): Round {}
 
 export type GameConfig = {
   players: string[]
@@ -39,8 +31,10 @@ export type GameConfig = {
   cardsPerPlayer: number
 }
 
-export function createGame(props: Partial<GameConfig>): Game {
-}
+export function createGame(props: Partial<GameConfig>): Game {}
 
-export function createGameFromMemento(memento: any, randomizer: Randomizer = standardRandomizer, shuffler: Shuffler<Card> = standardShuffler): Game {
-}
+export function createGameFromMemento(
+  memento: any,
+  randomizer: Randomizer = standardRandomizer,
+  shuffler: Shuffler<Card> = standardShuffler,
+): Game {}
