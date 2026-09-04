@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from '@jest/globals'
+import { describe, it, expect, beforeEach } from 'vitest'
 
 import { createGameFromMemento } from '../utils/test_adapter'
 
@@ -60,22 +60,22 @@ describe('create unfinished game from valid memento', () => {
 
 describe('create game from invalid memento', () => {
   it('fails on too few players', () => {
-    expect(() => createGameFromMemento({ ...unoMemento, players: ['A'] })).toThrowError()
+    expect(() => createGameFromMemento({ ...unoMemento, players: ['A'] })).toThrow()
   })
   it('fails on 0 target score', () => {
-    expect(() => createGameFromMemento({ ...unoMemento, targetScore: 0 })).toThrowError()
+    expect(() => createGameFromMemento({ ...unoMemento, targetScore: 0 })).toThrow()
   })
   it('fails on negative scores', () => {
-    expect(() => createGameFromMemento({ ...unoMemento, scores: [220, 430, -80] })).toThrowError()
+    expect(() => createGameFromMemento({ ...unoMemento, scores: [220, 430, -80] })).toThrow()
   })
   it('fails with fewer scores than players', () => {
-    expect(() => createGameFromMemento({ ...unoMemento, scores: [220, 430] })).toThrowError()
+    expect(() => createGameFromMemento({ ...unoMemento, scores: [220, 430] })).toThrow()
   })
   it('fails on several winners', () => {
-    expect(() => createGameFromMemento({ ...unoMemento, targetScore: 200 })).toThrowError()
+    expect(() => createGameFromMemento({ ...unoMemento, targetScore: 200 })).toThrow()
   })
   it('fails on missing current round in an unfinished game', () => {
-    expect(() => createGameFromMemento({ ...unoMemento, currentRound: undefined })).toThrowError()
+    expect(() => createGameFromMemento({ ...unoMemento, currentRound: undefined })).toThrow()
   })
 })
 

@@ -1,4 +1,4 @@
-import { describe, it, test, expect } from '@jest/globals'
+import { describe, it, test, expect } from 'vitest'
 
 import type { Game, GameMemento } from '../../src/model/uno'
 import { createGame, createGameFromMemento } from '../utils/test_adapter'

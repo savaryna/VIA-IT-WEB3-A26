@@ -1,4 +1,4 @@
-import { describe, it, test, expect, beforeEach, jest } from '@jest/globals'
+import { describe, it, test, expect, beforeEach, vi } from 'vitest'
 
 import type { Round } from '../../src/model/round'
 import { standardShuffler } from '../../src/utils/random_utils'
@@ -325,11 +325,11 @@ describe('Drawing a card', () => {
       dealer: 3,
       playerInTurn: 2,
     }
-    let mockShuffler = jest.fn(standardShuffler)
+    let mockShuffler = vi.fn(standardShuffler)
     let round: Round = createRoundFromMemento(memento, mockShuffler)
     const top = round.discardPile().top()
     beforeEach(() => {
-      mockShuffler = jest.fn(standardShuffler)
+      mockShuffler = vi.fn(standardShuffler)
       round = createRoundFromMemento(memento, mockShuffler)
       round.draw() // Drawing an unplayable card and emptying the draw pile
     })

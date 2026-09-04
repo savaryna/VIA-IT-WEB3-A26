@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from '@jest/globals'
+import { describe, it, expect, beforeEach } from 'vitest'
 
 import type { Round } from '../../src/model/round'
 import { is } from '../utils/predicates'
@@ -95,7 +95,7 @@ describe('create round from valid memento', () => {
 
 describe('create finished round from memento', () => {
   it("needs a playerInTurn if the game isn't finished", () => {
-    expect(() => createRoundFromMemento({ ...memento, playerInTurn: undefined })).toThrowError()
+    expect(() => createRoundFromMemento({ ...memento, playerInTurn: undefined })).toThrow()
   })
   it("doesn't need a playerInTurn if the game is finished", () => {
     const hands = [[], [{ type: 'REVERSE', color: 'GREEN' }], [{ type: 'SKIP', color: 'RED' }]]
@@ -111,7 +111,7 @@ describe('create round from invalid memento', () => {
         players: ['A', 'B', 'C'],
         hands: [[{ type: 'WILD' }, { type: 'DRAW', color: 'YELLOW' }], [{ type: 'REVERSE', color: 'GREEN' }]],
       }),
-    ).toThrowError()
+    ).toThrow()
   })
   it('throws less than 2 players', () => {
     expect(() =>
@@ -120,7 +120,7 @@ describe('create round from invalid memento', () => {
         players: ['A'],
         hands: [[{ type: 'WILD' }, { type: 'DRAW', color: 'YELLOW' }]],
       }),
-    ).toThrowError()
+    ).toThrow()
   })
   it('throws on 2 winners', () => {
     expect(() =>
@@ -128,7 +128,7 @@ describe('create round from invalid memento', () => {
         ...memento,
         hands: [[], [], [{ type: 'WILD' }]],
       }),
-    ).toThrowError()
+    ).toThrow()
   })
   it('throws on empty discard pile', () => {
     expect(() =>
@@ -136,7 +136,7 @@ describe('create round from invalid memento', () => {
         ...memento,
         discardPile: [],
       }),
-    ).toThrowError()
+    ).toThrow()
   })
   it("throws on non-color 'currentColor'", () => {
     expect(() =>
@@ -144,7 +144,7 @@ describe('create round from invalid memento', () => {
         ...memento,
         currentColor: 'BLEU',
       }),
-    ).toThrowError()
+    ).toThrow()
   })
   it("throws on inconsistent 'currentColor'", () => {
     expect(() =>
@@ -153,7 +153,7 @@ describe('create round from invalid memento', () => {
         discardPile: [{ type: 'SKIP', color: 'RED' }],
         currentColor: 'BLUE',
       }),
-    ).toThrowError()
+    ).toThrow()
   })
   it('throws on negative dealer', () => {
     expect(() =>
@@ -161,7 +161,7 @@ describe('create round from invalid memento', () => {
         ...memento,
         dealer: -1,
       }),
-    ).toThrowError()
+    ).toThrow()
   })
   it('throws on out of bounds dealer', () => {
     expect(() =>
@@ -169,7 +169,7 @@ describe('create round from invalid memento', () => {
         ...memento,
         dealer: 3,
       }),
-    ).toThrowError()
+    ).toThrow()
   })
   it("throws on negative 'playerInTurn'", () => {
     expect(() =>
@@ -177,7 +177,7 @@ describe('create round from invalid memento', () => {
         ...memento,
         playerInTurn: -1,
       }),
-    ).toThrowError()
+    ).toThrow()
   })
   it("throws on out of bounds 'playerInTurn'", () => {
     expect(() =>
@@ -185,7 +185,7 @@ describe('create round from invalid memento', () => {
         ...memento,
         playerInTurn: 3,
       }),
-    ).toThrowError()
+    ).toThrow()
   })
 })
 

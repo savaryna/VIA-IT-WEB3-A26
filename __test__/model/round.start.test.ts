@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import type { Card } from '../../src/model/deck'
 import type { Round } from '../../src/model/round'
@@ -42,7 +42,7 @@ describe('Round set up', () => {
     expect(round.dealer).toBe(1)
   })
   it('shuffles the deck', () => {
-    const mockShuffler = jest.fn()
+    const mockShuffler = vi.fn()
     createRound({ players: ['a', 'b', 'c', 'd'], dealer: 1, shuffler: mockShuffler })
     expect(mockShuffler).toBeCalledTimes(1)
   })
@@ -78,7 +78,7 @@ describe('Round set up', () => {
       .top()
       .isnt({ type: ['WILD', 'WILD DRAW'] })
       .build()
-    const mockShuffler = jest.fn(wildNotOnTop)
+    const mockShuffler = vi.fn(wildNotOnTop)
     const shuffler = successiveShufflers(wildOnDiscardTop, mockShuffler)
     createRound({ players: ['a', 'b', 'c', 'd'], dealer: 1, shuffler })
     expect(mockShuffler).toBeCalledTimes(1)
@@ -90,7 +90,7 @@ describe('Round set up', () => {
       .top()
       .isnt({ type: ['WILD', 'WILD DRAW'] })
       .build()
-    const mockShuffler = jest.fn(wildNotOnTop)
+    const mockShuffler = vi.fn(wildNotOnTop)
     const shuffler = successiveShufflers(wildOnDiscardTop, wildOnTop, mockShuffler)
     createRound({ players: ['a', 'b', 'c', 'd'], dealer: 1, shuffler })
     expect(mockShuffler).toBeCalledTimes(1)
@@ -101,7 +101,7 @@ describe('Round set up', () => {
       .top()
       .isnt({ type: ['WILD', 'WILD DRAW'] })
       .build()
-    const mockShuffler = jest.fn(wildNotOnTop)
+    const mockShuffler = vi.fn(wildNotOnTop)
     const shuffler = successiveShufflers(wildDrawOnDiscardTop, mockShuffler)
     createRound({ players: ['a', 'b', 'c', 'd'], dealer: 1, shuffler })
     expect(mockShuffler).toBeCalledTimes(1)
