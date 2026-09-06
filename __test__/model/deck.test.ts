@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import * as deck from '../../src/model/deck'
+import type { DeckMemento } from '../../src/model/deck.memento'
 import { standardShuffler } from '../../src/utils/random_utils'
 import { is } from '../utils/predicates'
 import { memoizingShuffler } from '../utils/shuffling'
@@ -115,7 +116,7 @@ describe('Deck methods', () => {
 describe('fromMemento', () => {
   describe('from valid Memnot', () => {
     it('returns a deck with all cards in order', () => {
-      const cards: Record<string, string | number>[] = [
+      const memento: DeckMemento = [
         { type: 'NUMBERED', color: 'BLUE', number: 7 },
         { type: 'SKIP', color: 'RED' },
         { type: 'REVERSE', color: 'GREEN' },
@@ -123,7 +124,7 @@ describe('fromMemento', () => {
         { type: 'WILD' },
         { type: 'WILD DRAW' },
       ]
-      const created: deck.Deck = createDeckFromMemento(cards)
+      const created: deck.Deck = createDeckFromMemento(memento)
       let card = created.deal()!
       expect(card.type).toEqual('NUMBERED')
       expect(deck.hasColor(card, 'BLUE')).toBeTruthy()
@@ -180,7 +181,7 @@ describe('fromMemento', () => {
 
 describe('toMemento', () => {
   it('Returns the Memento used to create it', () => {
-    const cards: Record<string, string | number>[] = [
+    const memento: DeckMemento = [
       { type: 'NUMBERED', color: 'BLUE', number: 7 },
       { type: 'SKIP', color: 'RED' },
       { type: 'REVERSE', color: 'GREEN' },
@@ -188,7 +189,7 @@ describe('toMemento', () => {
       { type: 'WILD' },
       { type: 'WILD DRAW' },
     ]
-    const created = createDeckFromMemento(cards)
-    expect(created.toMemento()).toEqual(cards)
+    const created = createDeckFromMemento(memento)
+    expect(created.toMemento()).toEqual(memento)
   })
 })
