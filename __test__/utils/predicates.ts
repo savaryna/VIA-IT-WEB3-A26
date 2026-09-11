@@ -1,10 +1,10 @@
-import { type Card, type Color, type Type } from '../../src/model/deck'
+import { type Card, type CardColor, type CardType } from '../../src/model/deck'
 
 export type CardPredicate = (_: Card | undefined) => boolean
 
 export type CardSpec = {
-  type?: Type | Type[]
-  color?: Color | Color[]
+  type?: CardType | CardType[]
+  color?: CardColor | CardColor[]
   number?: number | number[]
 }
 
