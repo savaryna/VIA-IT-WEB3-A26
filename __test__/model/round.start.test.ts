@@ -93,7 +93,7 @@ describe('Round set up', () => {
     const mockShuffler = vi.fn(wildNotOnTop)
     const shuffler = successiveShufflers(wildOnDiscardTop, wildOnTop, mockShuffler)
     createRound({ players: ['a', 'b', 'c', 'd'], dealer: 1, shuffler })
-    expect(mockShuffler).toBeCalledTimes(1)
+    expect(mockShuffler).toHaveBeenCalledTimes(1)
   })
   it('reshuffles if the top of the discard pile is a wild draw 4 card', () => {
     const wildDrawOnDiscardTop = shuffleBuilder().discard().is({ type: 'WILD DRAW' }).build()

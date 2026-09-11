@@ -6,6 +6,7 @@ export * from './card'
 
 export type Deck = {
   readonly size: number
+  top(): Card | undefined
   deal(): Card | undefined
   shuffle(shuffler: Shuffler<Card>): void
   filter(predicate: (card: Card) => boolean): Deck
@@ -33,6 +34,9 @@ export function createDeck(initialCards?: Card[]): Deck {
   return {
     get size() {
       return cards.length
+    },
+    top() {
+      return cards.at(0)
     },
     deal() {
       return cards.shift()
