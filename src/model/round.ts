@@ -1,6 +1,6 @@
 import type { Shuffler } from '../utils/random_utils'
-import type { Card } from './card'
-import { createDeck, type Deck } from './deck'
+import type { Card, CardColor } from './card'
+import { createDeck, hasColor, type Deck } from './deck'
 
 export type { RoundMemento } from './round.memento'
 
@@ -12,6 +12,8 @@ export type Round = {
   player(position: number): string
   playerHand(position: number): Card[]
   playerInTurn(): number
+  canPlay(cardIndex: number): boolean
+  play(cardIndex: number, newColor?: CardColor): void
 }
 
 export function createRound(
@@ -48,13 +50,21 @@ export function createRound(
 
   topCard = drawPile.deal()
   if (topCard === undefined) throw new Error('No more cards in the draw pile')
+  if (topCard.type === 'WILD' || topCard.type === 'WILD DRAW') {
+    throw new Error('The initial discard cannot be a wild card')
+  }
 
   // UNO rule: Turn over the top card of the DRAW pile to begin a DISCARD pile
   const discardPile = createDeck([topCard])
 
+  let currentColor: CardColor = topCard.color
+  let direction = topCard.type === 'REVERSE' ? -1 : 1
+  const initialDistance = topCard.type === 'SKIP' || topCard.type === 'DRAW' ? 2 : 1
+  let playerInTurn = moveFrom(dealer, initialDistance)
+
   // UNO rule: If this card is turned up at the beginning of play, the first player must draw two cards
   if (topCard.type === 'DRAW') {
-    const firstPlayer = playerInTurn()
+    const firstPlayer = moveFrom(dealer, 1)
     const card1 = drawPile.deal()
     const card2 = drawPile.deal()
     if (!card1 || !card2) throw new Error('No more cards in the draw pile')
@@ -62,14 +72,24 @@ export function createRound(
     hands[firstPlayer].push(card1, card2)
   }
 
-  function playerInTurn() {
-    // UNO rule: This card reverses direction of play
-    const direction = topCard?.type === 'REVERSE' ? -1 : 1
-    // UNO rule: The next person in line to play after this card is played loses his/her turn
-    const distance = topCard?.type === 'SKIP' ? 2 : 1
+  function moveFrom(player: number, distance: number) {
     const numPlayers = players.length
+    return (((player + distance * direction) % numPlayers) + numPlayers) % numPlayers
+  }
 
-    return (((dealer + distance * direction) % numPlayers) + numPlayers) % numPlayers
+  function canPlay(cardIndex: number) {
+    const hand = hands[playerInTurn]
+    const card = hand[cardIndex]
+    if (card === undefined) return false
+    const cardSymbol = card.type === 'NUMBERED' ? card.number : card.type
+    const topCardSymbol = topCard?.type === 'NUMBERED' ? topCard.number : topCard?.type
+
+    return (
+      hasColor(card, currentColor) ||
+      cardSymbol === topCardSymbol ||
+      card.type === 'WILD' ||
+      (card.type === 'WILD DRAW' && hand.every(c => !hasColor(c, currentColor)))
+    )
   }
 
   return {
@@ -95,6 +115,29 @@ export function createRound(
       if (hand === undefined) throw new Error('Player index is out of bounds')
       return hand
     },
-    playerInTurn,
+    playerInTurn() {
+      return playerInTurn
+    },
+    canPlay,
+    play(cardIndex, newColor) {
+      const hand = hands[playerInTurn]
+      const card = hand[cardIndex]
+      if (card === undefined) throw new Error('Card index is out of bounds')
+
+      if (!canPlay(cardIndex)) throw new Error('Card cannot be played')
+
+      hand.splice(cardIndex, 1)
+      discardPile.add(card)
+      if (card.type === 'WILD' || card.type === 'WILD DRAW') {
+        if (newColor === undefined) throw new Error('New color is required for wild cards')
+        currentColor = newColor
+      } else {
+        currentColor = card.color
+      }
+      topCard = card
+      if (card.type === 'REVERSE') direction *= -1
+      const distance = card.type === 'SKIP' || card.type === 'DRAW' || card.type === 'WILD DRAW' ? 2 : 1
+      playerInTurn = moveFrom(playerInTurn, distance)
+    },
   }
 }

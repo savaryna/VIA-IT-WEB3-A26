@@ -6,6 +6,7 @@ export * from './card'
 
 export type Deck = {
   readonly size: number
+  add(card: Card): void
   top(): Card | undefined
   deal(): Card | undefined
   shuffle(shuffler: Shuffler<Card>): void
@@ -34,6 +35,9 @@ export function createDeck(initialCards?: Card[]): Deck {
   return {
     get size() {
       return cards.length
+    },
+    add(card) {
+      cards.unshift(card)
     },
     top() {
       return cards.at(0)
