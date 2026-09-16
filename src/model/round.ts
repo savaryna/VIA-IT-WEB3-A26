@@ -2,6 +2,7 @@
 import { standardShuffler, type Shuffler } from '../utils/random_utils'
 import { isColor, type Card, type CardColor } from './card'
 import { createDeck, fromMemento as createDeckFromMemento, hasColor, type Deck } from './deck'
+import { createHand, fromMemento as createHandFromMemento, type Hand } from './hand'
 import type { Direction, RoundMemento } from './round.memento'
 
 export type { RoundMemento } from './round.memento'
@@ -12,7 +13,7 @@ export type Round = {
   drawPile(): Deck
   discardPile(): Deck
   player(position: number): string
-  playerHand(position: number): Card[]
+  playerHand(position: number): readonly Card[]
   playerInTurn(): number | undefined
   canPlay(cardIndex: number): boolean
   canPlayAny(): boolean
@@ -24,7 +25,7 @@ export type Round = {
 export type RoundState = {
   players: string[]
   dealer: number
-  hands: Card[][]
+  hands: Hand[]
   drawPile: Deck
   discardPile: Deck
   currentColor: CardColor
@@ -53,12 +54,13 @@ export function createRound(props: CreateRoundProps): Round {
   const { shuffler } = props
   let players: string[]
   let dealer: number
-  let hands: Card[][]
+  let hands: Hand[]
   let drawPile: Deck
   let discardPile: Deck
   let currentColor: CardColor
   let currentDirection: Direction
   let playerInTurn: number | undefined
+  let drawnCardIndex: number | undefined
 
   function movePlayer(player: number, distance: number) {
     const step = currentDirection === 'clockwise' ? 1 : -1
@@ -81,15 +83,20 @@ export function createRound(props: CreateRoundProps): Round {
     const { cardsPerPlayer = 7 } = props
     if (players.length < 2) throw new Error('At least 2 players are required')
     if (players.length > 10) throw new Error('At most 10 players are allowed')
+    if (!Number.isInteger(cardsPerPlayer) || cardsPerPlayer < 1) {
+      throw new Error('Cards per player must be a positive integer')
+    }
 
     drawPile = createDeck()
     drawPile.shuffle(shuffler)
     hands = players.map(() =>
-      Array.from({ length: cardsPerPlayer }, () => {
-        const card = drawPile.deal()
-        if (card === undefined) throw new Error('No more cards in the draw pile')
-        return card
-      }),
+      createHand(
+        Array.from({ length: cardsPerPlayer }, () => {
+          const card = drawPile.deal()
+          if (card === undefined) throw new Error('No more cards in the draw pile')
+          return card
+        }),
+      ),
     )
 
     let topCard = drawPile.top()
@@ -128,26 +135,23 @@ export function createRound(props: CreateRoundProps): Round {
       replenishDrawPile()
       const card = drawPile.deal()
       if (card === undefined) throw new Error('No more cards in the draw pile')
-      hands[player].push(card)
+      hands[player].add(card)
       replenishDrawPile()
     }
   }
 
   function canPlay(cardIndex: number) {
     if (playerInTurn === undefined) return false
+    if (drawnCardIndex !== undefined && cardIndex !== drawnCardIndex) return false
     const hand = hands[playerInTurn]
-    const card = hand[cardIndex]
+    const card = hand.get(cardIndex)
     if (card === undefined) return false
+    if (card.type === 'WILD DRAW') return !hand.some(c => hasColor(c, currentColor))
     const cardSymbol = card.type === 'NUMBERED' ? card.number : card.type
     const topCard = discardPile.top()
     const topCardSymbol = topCard?.type === 'NUMBERED' ? topCard.number : topCard?.type
 
-    return (
-      hasColor(card, currentColor) ||
-      cardSymbol === topCardSymbol ||
-      card.type === 'WILD' ||
-      (card.type === 'WILD DRAW' && hand.every(c => !hasColor(c, currentColor)))
-    )
+    return hasColor(card, currentColor) || cardSymbol === topCardSymbol || card.type === 'WILD'
   }
 
   return {
@@ -171,7 +175,7 @@ export function createRound(props: CreateRoundProps): Round {
     playerHand(position) {
       const hand = hands[position]
       if (hand === undefined) throw new Error('Player index is out of bounds')
-      return hand
+      return hand.cards()
     },
     playerInTurn() {
       return playerInTurn
@@ -182,14 +186,16 @@ export function createRound(props: CreateRoundProps): Round {
     },
     draw() {
       if (playerInTurn === undefined) throw new Error('The round has ended')
+      if (drawnCardIndex !== undefined) throw new Error('The drawn card must be played')
       const hand = hands[playerInTurn]
       drawCards(playerInTurn, 1)
-      if (!canPlay(hand.length - 1)) playerInTurn = movePlayer(playerInTurn, 1)
+      if (canPlay(hand.size - 1)) drawnCardIndex = hand.size - 1
+      else playerInTurn = movePlayer(playerInTurn, 1)
     },
     play(cardIndex, newColor) {
       if (playerInTurn === undefined) throw new Error('The round has ended')
       const hand = hands[playerInTurn]
-      const card = hand[cardIndex]
+      const card = hand.get(cardIndex)
       if (card === undefined) throw new Error('Card index is out of bounds')
       if (!canPlay(cardIndex)) throw new Error('Card cannot be played')
       let playedColor: CardColor
@@ -201,7 +207,8 @@ export function createRound(props: CreateRoundProps): Round {
         playedColor = card.color
       }
 
-      hand.splice(cardIndex, 1)
+      hand.remove(cardIndex)
+      drawnCardIndex = undefined
       discardPile.add(card)
       currentColor = playedColor
       if (card.type === 'REVERSE') {
@@ -211,13 +218,13 @@ export function createRound(props: CreateRoundProps): Round {
       if (penalty > 0) drawCards(movePlayer(playerInTurn, 1), penalty)
       const skipsNextPlayer = card.type === 'SKIP' || penalty > 0 || (card.type === 'REVERSE' && players.length === 2)
       const distance = skipsNextPlayer ? 2 : 1
-      playerInTurn = hand.length === 0 ? undefined : movePlayer(playerInTurn, distance)
+      playerInTurn = hand.size === 0 ? undefined : movePlayer(playerInTurn, distance)
       return card
     },
     toMemento() {
       return {
         players: [...players],
-        hands: hands.map(hand => hand.map(card => ({ ...card }))),
+        hands: hands.map(hand => hand.toMemento()),
         drawPile: drawPile.toMemento().map(card => ({ ...card })),
         discardPile: discardPile.toMemento().map(card => ({ ...card })),
         currentColor,
@@ -249,10 +256,11 @@ export function fromMemento(memento: RoundMemento, shuffler: Shuffler<Card> = st
     throw new Error('Player in turn index is out of bounds')
   }
 
-  const restoredHands = hands.map(createDeckFromMemento).map(deck => deck.toMemento() as Card[])
-  const winners = restoredHands.filter(hand => hand.length === 0).length
+  const restoredHands = hands.map(createHandFromMemento)
+  const winners = restoredHands.filter(hand => hand.size === 0).length
   if (winners > 1) throw new Error('A round cannot have more than one winner')
   if (winners === 0 && playerInTurn === undefined) throw new Error('An unfinished round needs a player in turn')
+  if (winners > 0 && playerInTurn !== undefined) throw new Error('A finished round cannot have a player in turn')
 
   const drawPile = createDeckFromMemento(memento.drawPile)
   const discardPile = createDeckFromMemento(memento.discardPile)

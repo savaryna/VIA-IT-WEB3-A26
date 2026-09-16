@@ -1,10 +1,11 @@
 import type { DeckMemento } from './deck.memento'
+import type { HandMemento } from './hand.memento'
 
 export type Direction = 'clockwise' | 'counterclockwise'
 
 export type RoundMemento = {
   players: string[]
-  hands: DeckMemento[]
+  hands: HandMemento[]
   drawPile: DeckMemento
   discardPile: DeckMemento
   currentColor: string
