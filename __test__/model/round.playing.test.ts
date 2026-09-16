@@ -1,5 +1,6 @@
 import { describe, it, test, expect, beforeEach, vi } from 'vitest'
 
+import type { CardColor } from '../../src/model/card'
 import type { Round } from '../../src/model/round'
 import { standardShuffler } from '../../src/utils/random_utils'
 import { is } from '../utils/predicates'
@@ -195,6 +196,18 @@ describe('Playing a card', () => {
   })
 
   describe('Boundaries', () => {
+    it('rejects an invalid wild color without changing the round', () => {
+      const shuffler = shuffleBuilder()
+        .discard()
+        .is({ type: 'NUMBERED', color: 'BLUE' })
+        .hand(0)
+        .is({ type: 'WILD' })
+        .build()
+      const round = createRound({ players: ['a', 'b', 'c', 'd'], dealer: 3, shuffler })
+      const before = round.toMemento()
+      expect(() => round.play(0, 'PURPLE' as CardColor)).toThrow()
+      expect(round.toMemento()).toEqual(before)
+    })
     it('is illegal to play a non-existant card', () => {
       const round = createRound({ players: ['a', 'b', 'c', 'd'], dealer: 3 })
       expect(() => round.play(-1)).toThrow()
@@ -247,7 +260,7 @@ describe('Drawing a card', () => {
       const round: Round = createRound({ players: ['a', 'b', 'c', 'd'], dealer: 3, shuffler })
       expect(round.canPlayAny()).toBeTruthy()
     })
-    it('returns false if the player has a playable card', () => {
+    it('returns false if the player has no playable card', () => {
       const shuffler = shuffleBuilder()
         .discard()
         .is({ type: 'NUMBERED', color: 'BLUE', number: 0 })
@@ -298,7 +311,7 @@ describe('Drawing a card', () => {
       round.draw()
       expect(round.playerInTurn()).toBe(1)
     })
-    it("doesn't move to the next player if the card is unplayable", () => {
+    it("doesn't move to the next player if the card is playable", () => {
       const shuffler = builder.drawPile().is({ type: 'DRAW', color: 'BLUE' }).build()
       const round = createRound({ players: ['a', 'b', 'c', 'd'], dealer: 3, shuffler })
       round.draw()
@@ -346,7 +359,7 @@ describe('Drawing a card', () => {
       expect(round.drawPile().size).toEqual(1)
     })
     it('leaves the cards removed from the discard pile in the draw pile', () => {
-      expect(is({ type: 'NUMBERED', color: 'BLUE', number: 8 })(round.drawPile().peek())).toBeTruthy()
+      expect(is({ type: 'NUMBERED', color: 'BLUE', number: 8 })(round.drawPile().top())).toBeTruthy()
     })
   })
 
@@ -372,11 +385,30 @@ describe('Drawing a card', () => {
       dealer: 3,
       playerInTurn: 1,
     }
-    const round = createRoundFromMemento(memento)
-    round.play(1)
-    expect(round.playerHand(2).length).toEqual(3)
-    expect(round.discardPile().size).toEqual(1)
-    expect(round.drawPile().size).toEqual(1)
+
+    it('recycles the discard pile while applying a draw penalty', () => {
+      const round = createRoundFromMemento(memento)
+      round.play(1)
+      expect(round.playerHand(2).length).toEqual(3)
+      expect(round.discardPile().size).toEqual(1)
+      expect(round.drawPile().size).toEqual(1)
+    })
+
+    it('applies the penalty in the current direction even when the played card ends the round', () => {
+      const round = createRoundFromMemento({
+        ...memento,
+        currentDirection: 'counterclockwise',
+        hands: memento.hands.map((hand, index) => (index === 1 ? [hand[1]] : hand)),
+      })
+      round.play(0)
+      expect(round.playerHand(0)).toHaveLength(3)
+      expect(round.playerHand(2)).toHaveLength(1)
+      expect(round.playerInTurn()).toBeUndefined()
+      expect(round.canPlayAny()).toBe(false)
+      const ended = round.toMemento()
+      expect(() => round.draw()).toThrow()
+      expect(round.toMemento()).toEqual(ended)
+    })
   })
 })
 

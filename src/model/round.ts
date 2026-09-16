@@ -15,7 +15,9 @@ export type Round = {
   playerHand(position: number): Card[]
   playerInTurn(): number | undefined
   canPlay(cardIndex: number): boolean
-  play(cardIndex: number, newColor?: CardColor): void
+  canPlayAny(): boolean
+  draw(): void
+  play(cardIndex: number, newColor?: CardColor): Card
   toMemento(): RoundMemento
 }
 
@@ -109,11 +111,25 @@ export function createRound(props: CreateRoundProps): Round {
     playerInTurn = movePlayer(dealer, initialDistance)
 
     if (topCard.type === 'DRAW') {
-      const firstPlayer = movePlayer(dealer, 1)
-      const card1 = drawPile.deal()
-      const card2 = drawPile.deal()
-      if (!card1 || !card2) throw new Error('No more cards in the draw pile')
-      hands[firstPlayer].push(card1, card2)
+      drawCards(movePlayer(dealer, 1), 2)
+    }
+  }
+
+  function replenishDrawPile() {
+    if (drawPile.size > 0 || discardPile.size <= 1) return
+    const topCard = discardPile.deal()!
+    drawPile = discardPile
+    discardPile = createDeck([topCard])
+    drawPile.shuffle(shuffler)
+  }
+
+  function drawCards(player: number, count: number) {
+    for (let i = 0; i < count; i++) {
+      replenishDrawPile()
+      const card = drawPile.deal()
+      if (card === undefined) throw new Error('No more cards in the draw pile')
+      hands[player].push(card)
+      replenishDrawPile()
     }
   }
 
@@ -161,28 +177,42 @@ export function createRound(props: CreateRoundProps): Round {
       return playerInTurn
     },
     canPlay,
+    canPlayAny() {
+      return playerInTurn !== undefined && hands[playerInTurn].some((_, index) => canPlay(index))
+    },
+    draw() {
+      if (playerInTurn === undefined) throw new Error('The round has ended')
+      const hand = hands[playerInTurn]
+      drawCards(playerInTurn, 1)
+      if (!canPlay(hand.length - 1)) playerInTurn = movePlayer(playerInTurn, 1)
+    },
     play(cardIndex, newColor) {
       if (playerInTurn === undefined) throw new Error('The round has ended')
       const hand = hands[playerInTurn]
       const card = hand[cardIndex]
       if (card === undefined) throw new Error('Card index is out of bounds')
       if (!canPlay(cardIndex)) throw new Error('Card cannot be played')
-      if ((card.type === 'WILD' || card.type === 'WILD DRAW') && newColor === undefined) {
-        throw new Error('New color is required for wild cards')
+      let playedColor: CardColor
+      if (card.type === 'WILD' || card.type === 'WILD DRAW') {
+        if (!isColor(newColor)) throw new Error('A valid new color is required for wild cards')
+        playedColor = newColor
+      } else {
+        if (newColor !== undefined) throw new Error('Only wild cards can name a new color')
+        playedColor = card.color
       }
 
       hand.splice(cardIndex, 1)
       discardPile.add(card)
-      if (card.type === 'WILD' || card.type === 'WILD DRAW') {
-        currentColor = newColor as CardColor
-      } else {
-        currentColor = card.color
-      }
+      currentColor = playedColor
       if (card.type === 'REVERSE') {
         currentDirection = currentDirection === 'clockwise' ? 'counterclockwise' : 'clockwise'
       }
-      const distance = card.type === 'SKIP' || card.type === 'DRAW' || card.type === 'WILD DRAW' ? 2 : 1
+      const penalty = card.type === 'DRAW' ? 2 : card.type === 'WILD DRAW' ? 4 : 0
+      if (penalty > 0) drawCards(movePlayer(playerInTurn, 1), penalty)
+      const skipsNextPlayer = card.type === 'SKIP' || penalty > 0 || (card.type === 'REVERSE' && players.length === 2)
+      const distance = skipsNextPlayer ? 2 : 1
       playerInTurn = hand.length === 0 ? undefined : movePlayer(playerInTurn, distance)
+      return card
     },
     toMemento() {
       return {
