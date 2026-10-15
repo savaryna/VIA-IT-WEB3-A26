@@ -20,6 +20,8 @@ export type Round = {
   score(): number | undefined
   canPlay(cardIndex: number): boolean
   canPlayAny(): boolean
+  sayUno(player: number): void
+  catchUnoFailure(accusation: { accuser: number; accused: number }): boolean
   challengeWildDrawFour(challenger: number): void
   draw(): void
   play(cardIndex: number, newColor?: CardColor): Card
@@ -66,6 +68,14 @@ export function createRound(props: CreateRoundProps): Round {
   let playerInTurn: number | undefined
   let drawnCardIndex: number | undefined
   let wildDrawChallenger: number | undefined
+  let unoDeclaration: number | undefined
+  let unoFailure: number | undefined
+
+  function validatePlayer(player: number) {
+    if (!Number.isInteger(player) || player < 0 || player >= players.length) {
+      throw new Error('Player index is out of bounds')
+    }
+  }
 
   function movePlayer(player: number, distance: number) {
     const step = currentDirection === 'clockwise' ? 1 : -1
@@ -214,6 +224,21 @@ export function createRound(props: CreateRoundProps): Round {
     canPlayAny() {
       return playerInTurn !== undefined && hands[playerInTurn].some((_, index) => canPlay(index))
     },
+    sayUno(player) {
+      if (playerInTurn === undefined) throw new Error('The round has ended')
+      validatePlayer(player)
+      if (unoFailure === player) unoFailure = undefined
+      if (player === playerInTurn && hands[player].size === 2) unoDeclaration = player
+    },
+    catchUnoFailure({ accuser, accused }) {
+      if (playerInTurn === undefined) throw new Error('The round has ended')
+      validatePlayer(accuser)
+      validatePlayer(accused)
+      if (accuser === accused || unoFailure !== accused) return false
+      drawCards(accused, 4)
+      unoFailure = undefined
+      return true
+    },
     challengeWildDrawFour(challenger) {
       if (playerInTurn === undefined) throw new Error('The round has ended')
       if (challenger !== wildDrawChallenger || wildDrawChallenger === undefined) {
@@ -229,6 +254,8 @@ export function createRound(props: CreateRoundProps): Round {
       if (drawnCardIndex !== undefined) throw new Error('The drawn card must be played')
       const hand = hands[playerInTurn]
       drawCards(playerInTurn, 1)
+      unoDeclaration = undefined
+      unoFailure = undefined
       wildDrawChallenger = undefined
       if (canPlay(hand.size - 1)) drawnCardIndex = hand.size - 1
       else playerInTurn = movePlayer(playerInTurn, 1)
@@ -248,8 +275,13 @@ export function createRound(props: CreateRoundProps): Round {
         playedColor = card.color
       }
 
+      // A valid play starts a turn and closes the previous accusation window.
+      const saidUno = unoDeclaration === playerInTurn
+      unoDeclaration = undefined
+      unoFailure = undefined
       wildDrawChallenger = undefined
       hand.remove(cardIndex)
+      if (hand.size === 1 && !saidUno) unoFailure = playerInTurn
       drawnCardIndex = undefined
       discardPile.add(card)
       currentColor = playedColor
