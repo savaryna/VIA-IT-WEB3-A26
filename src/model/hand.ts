@@ -14,7 +14,7 @@ export type Hand = {
 }
 
 export function createHand(initialCards: readonly Card[] = []): Hand {
-  const cards = [...initialCards].map(card => ({ ...card }))
+  const cards = [...initialCards]
 
   function get(index: number) {
     return Number.isInteger(index) && index >= 0 ? cards[index] : undefined

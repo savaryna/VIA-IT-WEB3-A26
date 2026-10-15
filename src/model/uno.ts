@@ -1,6 +1,6 @@
 import { standardRandomizer, standardShuffler, type Randomizer, type Shuffler } from '../utils/random_utils'
 import type { Card } from './card'
-import { createRound, fromMemento as restoreRound, type Round } from './round'
+import { createRound, fromMemento as createRoundFromMemento, type Round } from './round'
 import type { GameMemento } from './uno.memento'
 
 export type { GameMemento } from './uno.memento'
@@ -31,11 +31,25 @@ function validateConfig(players: string[], targetScore: number, cardsPerPlayer: 
   }
 }
 
-function createGameState(config: GameConfig, initialScores: number[], initialRound?: Round): Game {
-  const players = [...config.players]
-  const { targetScore, cardsPerPlayer, shuffler, randomizer } = config
-  const scores = [...initialScores]
-  let round = initialRound
+type GameState = {
+  scores: number[]
+  currentRound?: Round
+}
+
+export function createGame(
+  {
+    players: initialPlayers = ['A', 'B'],
+    targetScore = 500,
+    cardsPerPlayer = 7,
+    randomizer = standardRandomizer,
+    shuffler = standardShuffler,
+  }: Partial<GameConfig> = {},
+  initialState?: GameState,
+): Game {
+  const players = [...initialPlayers]
+  const scores = initialState ? [...initialState.scores] : players.map(() => 0)
+  validateConfig(players, targetScore, cardsPerPlayer)
+  let round = initialState?.currentRound
   let winningPlayer: number | undefined = scores.findIndex(score => score >= targetScore)
   if (winningPlayer === -1) winningPlayer = undefined
 
@@ -101,20 +115,6 @@ function createGameState(config: GameConfig, initialScores: number[], initialRou
   }
 }
 
-export function createGame({
-  players = ['A', 'B'],
-  targetScore = 500,
-  cardsPerPlayer = 7,
-  randomizer = standardRandomizer,
-  shuffler = standardShuffler,
-}: Partial<GameConfig> = {}): Game {
-  validateConfig(players, targetScore, cardsPerPlayer)
-  return createGameState(
-    { players, targetScore, cardsPerPlayer, randomizer, shuffler },
-    players.map(() => 0),
-  )
-}
-
 export function fromMemento(
   memento: GameMemento,
   randomizer: Randomizer = standardRandomizer,
@@ -129,7 +129,7 @@ export function fromMemento(
   if (winners > 1) throw new Error('A game cannot have several winners')
   if (winners === 0 && !currentRound) throw new Error('An unfinished game requires a current round')
   if (winners > 0 && currentRound) throw new Error('A finished game cannot have a current round')
-  const restoredRound = currentRound ? restoreRound(currentRound, shuffler) : undefined
+  const restoredRound = currentRound ? createRoundFromMemento(currentRound, shuffler) : undefined
   if (
     restoredRound &&
     (restoredRound.hasEnded() ||
@@ -138,5 +138,8 @@ export function fromMemento(
   ) {
     throw new Error('Current round must be unfinished and have the same players as the game')
   }
-  return createGameState({ players, targetScore, cardsPerPlayer, randomizer, shuffler }, scores, restoredRound)
+  return createGame(
+    { players, targetScore, cardsPerPlayer, randomizer, shuffler },
+    { scores, currentRound: restoredRound },
+  )
 }

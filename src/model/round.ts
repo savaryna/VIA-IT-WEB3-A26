@@ -1,11 +1,13 @@
-// oxlint-disable prefer-destructuring -- explicit state assignment is clearer than parenthesized reassignment
+// oxlint-disable prefer-destructuring -- explicit assignments keep closure state initialization readable
 import { standardShuffler, type Shuffler } from '../utils/random_utils'
 import { isColor, type Card, type CardColor } from './card'
 import { createDeck, fromMemento as createDeckFromMemento, hasColor, type Deck } from './deck'
 import { createHand, fromMemento as createHandFromMemento, type Hand } from './hand'
-import type { Direction, RoundMemento } from './round.memento'
+import type { RoundMemento } from './round.memento'
 
 export type { RoundMemento } from './round.memento'
+
+export type Direction = 'clockwise' | 'counterclockwise'
 
 export type RoundEnd = { winner: number }
 
@@ -87,15 +89,14 @@ export function createRound(props: CreateRoundProps): Round {
   }
 
   if (props.initialState) {
-    const state = props.initialState
-    players = [...state.players]
-    dealer = state.dealer
-    hands = state.hands.map(hand => createHand(hand.cards()))
-    drawPile = state.drawPile
-    discardPile = state.discardPile
-    currentColor = state.currentColor
-    currentDirection = state.currentDirection
-    playerInTurn = state.playerInTurn
+    dealer = props.initialState.dealer
+    drawPile = props.initialState.drawPile
+    discardPile = props.initialState.discardPile
+    currentColor = props.initialState.currentColor
+    currentDirection = props.initialState.currentDirection
+    playerInTurn = props.initialState.playerInTurn
+    players = [...props.initialState.players]
+    hands = props.initialState.hands.map(hand => createHand(hand.cards()))
   } else {
     players = [...props.players]
     dealer = props.dealer
@@ -311,8 +312,8 @@ export function createRound(props: CreateRoundProps): Round {
       return {
         players: [...players],
         hands: hands.map(hand => hand.toMemento()),
-        drawPile: drawPile.toMemento().map(card => ({ ...card })),
-        discardPile: discardPile.toMemento().map(card => ({ ...card })),
+        drawPile: drawPile.toMemento(),
+        discardPile: discardPile.toMemento(),
         currentColor,
         currentDirection,
         dealer,
