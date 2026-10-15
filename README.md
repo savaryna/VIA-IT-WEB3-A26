@@ -9,8 +9,8 @@ The implementation follows the [given rules](RULES.md) with the 2 player mode co
 **Assignment 1 - 3:** Build the application using an **OO** approach. **Assignment 4 - 5:** Build the application using a **functional** approach.
 
 1. [Create the game engine using interface + object literal in TypeScript](assignments/1.md)
-2. Create the user interface with Vue.js
-3. Create the server with GraphQL
+2. [Create the user interface with Vue.js](assignments/2.md)
+3. [Create the server with GraphQL](assignments/3.md)
 4. Create the game engine using functional programming in TypeScript
 5. Create the user interface with React, Redux and RxJS
 6. Port the React application to Next.js
