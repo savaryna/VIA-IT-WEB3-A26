@@ -1,13 +1,16 @@
-// oxlint-disable no-unused-vars until an actual implementation is provided
 import type { Card } from '../../src/model/card'
 import { createDeck, fromMemento, type Deck } from '../../src/model/deck'
 import type { DeckMemento } from '../../src/model/deck.memento'
 import { type Round, type RoundMemento } from '../../src/model/round'
 import { createRound as createInitialRound, fromMemento as restoreRound } from '../../src/model/round'
-import { type Game, type GameMemento } from '../../src/model/uno'
+import {
+  createGame as createInitialGame,
+  fromMemento as restoreGame,
+  type Game,
+  type GameMemento,
+} from '../../src/model/uno'
 import { type Randomizer, type Shuffler, standardRandomizer, standardShuffler } from '../../src/utils/random_utils'
 
-// TODO: Fill out the empty functions
 export function createInitialDeck(): Deck {
   return createDeck()
 }
@@ -39,10 +42,14 @@ export type GameConfig = {
   cardsPerPlayer: number
 }
 
-export function createGame(props: Partial<GameConfig>): Game {}
+export function createGame(props: Partial<GameConfig>): Game {
+  return createInitialGame(props)
+}
 
 export function createGameFromMemento(
   memento: GameMemento,
   randomizer: Randomizer = standardRandomizer,
   shuffler: Shuffler<Card> = standardShuffler,
-): Game {}
+): Game {
+  return restoreGame(memento, randomizer, shuffler)
+}

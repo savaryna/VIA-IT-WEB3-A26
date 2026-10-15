@@ -7,6 +7,8 @@ import type { Direction, RoundMemento } from './round.memento'
 
 export type { RoundMemento } from './round.memento'
 
+export type RoundEnd = { winner: number }
+
 export type Round = {
   readonly playerCount: number
   readonly dealer: number
@@ -18,6 +20,7 @@ export type Round = {
   hasEnded(): boolean
   winner(): number | undefined
   score(): number | undefined
+  onEnd(callback: (event: RoundEnd) => void): void
   canPlay(cardIndex: number): boolean
   canPlayAny(): boolean
   sayUno(player: number): void
@@ -70,6 +73,7 @@ export function createRound(props: CreateRoundProps): Round {
   let wildDrawChallenger: number | undefined
   let unoDeclaration: number | undefined
   let unoFailure: number | undefined
+  const endCallbacks: ((event: RoundEnd) => void)[] = []
 
   function validatePlayer(player: number) {
     if (!Number.isInteger(player) || player < 0 || player >= players.length) {
@@ -220,6 +224,9 @@ export function createRound(props: CreateRoundProps): Round {
         0,
       )
     },
+    onEnd(callback) {
+      endCallbacks.push(callback)
+    },
     canPlay,
     canPlayAny() {
       return playerInTurn !== undefined && hands[playerInTurn].some((_, index) => canPlay(index))
@@ -293,7 +300,11 @@ export function createRound(props: CreateRoundProps): Round {
       if (card.type === 'WILD DRAW') wildDrawChallenger = movePlayer(playerInTurn, 1)
       const skipsNextPlayer = card.type === 'SKIP' || penalty > 0 || (card.type === 'REVERSE' && players.length === 2)
       const distance = skipsNextPlayer ? 2 : 1
+      const winner = playerInTurn
       playerInTurn = hand.size === 0 ? undefined : movePlayer(playerInTurn, distance)
+      if (playerInTurn === undefined) {
+        endCallbacks.forEach(callback => callback({ winner }))
+      }
       return card
     },
     toMemento() {
