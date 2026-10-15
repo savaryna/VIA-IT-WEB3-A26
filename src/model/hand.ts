@@ -14,7 +14,7 @@ export type Hand = {
 }
 
 export function createHand(initialCards: readonly Card[] = []): Hand {
-  const cards = initialCards.map(card => ({ ...card }))
+  const cards = [...initialCards].map(card => ({ ...card }))
 
   function get(index: number) {
     return Number.isInteger(index) && index >= 0 ? cards[index] : undefined
@@ -26,7 +26,7 @@ export function createHand(initialCards: readonly Card[] = []): Hand {
     },
     get,
     add(card) {
-      cards.push(card)
+      cards.push({ ...card })
     },
     remove(index) {
       const card = get(index)

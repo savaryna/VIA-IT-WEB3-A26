@@ -15,8 +15,12 @@ export type Round = {
   player(position: number): string
   playerHand(position: number): readonly Card[]
   playerInTurn(): number | undefined
+  hasEnded(): boolean
+  winner(): number | undefined
+  score(): number | undefined
   canPlay(cardIndex: number): boolean
   canPlayAny(): boolean
+  challengeWildDrawFour(challenger: number): void
   draw(): void
   play(cardIndex: number, newColor?: CardColor): Card
   toMemento(): RoundMemento
@@ -61,6 +65,7 @@ export function createRound(props: CreateRoundProps): Round {
   let currentDirection: Direction
   let playerInTurn: number | undefined
   let drawnCardIndex: number | undefined
+  let wildDrawChallenger: number | undefined
 
   function movePlayer(player: number, distance: number) {
     const step = currentDirection === 'clockwise' ? 1 : -1
@@ -69,22 +74,29 @@ export function createRound(props: CreateRoundProps): Round {
 
   if (props.initialState) {
     const state = props.initialState
-    players = state.players
+    players = [...state.players]
     dealer = state.dealer
-    hands = state.hands
+    hands = state.hands.map(hand => createHand(hand.cards()))
     drawPile = state.drawPile
     discardPile = state.discardPile
     currentColor = state.currentColor
     currentDirection = state.currentDirection
     playerInTurn = state.playerInTurn
   } else {
-    players = props.players
+    players = [...props.players]
     dealer = props.dealer
     const { cardsPerPlayer = 7 } = props
     if (players.length < 2) throw new Error('At least 2 players are required')
     if (players.length > 10) throw new Error('At most 10 players are allowed')
     if (!Number.isInteger(cardsPerPlayer) || cardsPerPlayer < 1) {
       throw new Error('Cards per player must be a positive integer')
+    }
+
+    if (!Number.isInteger(dealer) || dealer < 0) {
+      throw new Error('Dealer index is out of bounds')
+    }
+    if (players.length * cardsPerPlayer >= 108) {
+      throw new Error('Not enough cards to deal and start the discard pile')
     }
 
     drawPile = createDeck()
@@ -180,15 +192,44 @@ export function createRound(props: CreateRoundProps): Round {
     playerInTurn() {
       return playerInTurn
     },
+    hasEnded() {
+      return playerInTurn === undefined
+    },
+    winner() {
+      return playerInTurn === undefined ? hands.findIndex(hand => hand.size === 0) : undefined
+    },
+    score() {
+      if (playerInTurn !== undefined) return undefined
+      return hands.reduce(
+        (total, hand) =>
+          total +
+          hand.cards().reduce((sum, card) => {
+            if (card.type === 'NUMBERED') return sum + card.number
+            return sum + (card.type === 'WILD' || card.type === 'WILD DRAW' ? 50 : 20)
+          }, 0),
+        0,
+      )
+    },
     canPlay,
     canPlayAny() {
       return playerInTurn !== undefined && hands[playerInTurn].some((_, index) => canPlay(index))
+    },
+    challengeWildDrawFour(challenger) {
+      if (playerInTurn === undefined) throw new Error('The round has ended')
+      if (challenger !== wildDrawChallenger || wildDrawChallenger === undefined) {
+        throw new Error('Only the affected player can challenge immediately after Wild Draw Four')
+      }
+      // Illegal Wild Draw Four plays are rejected by canPlay, so a challenge
+      // always fails: the challenger already drew four and now draws two more.
+      drawCards(challenger, 2)
+      wildDrawChallenger = undefined
     },
     draw() {
       if (playerInTurn === undefined) throw new Error('The round has ended')
       if (drawnCardIndex !== undefined) throw new Error('The drawn card must be played')
       const hand = hands[playerInTurn]
       drawCards(playerInTurn, 1)
+      wildDrawChallenger = undefined
       if (canPlay(hand.size - 1)) drawnCardIndex = hand.size - 1
       else playerInTurn = movePlayer(playerInTurn, 1)
     },
@@ -207,6 +248,7 @@ export function createRound(props: CreateRoundProps): Round {
         playedColor = card.color
       }
 
+      wildDrawChallenger = undefined
       hand.remove(cardIndex)
       drawnCardIndex = undefined
       discardPile.add(card)
@@ -216,6 +258,7 @@ export function createRound(props: CreateRoundProps): Round {
       }
       const penalty = card.type === 'DRAW' ? 2 : card.type === 'WILD DRAW' ? 4 : 0
       if (penalty > 0) drawCards(movePlayer(playerInTurn, 1), penalty)
+      if (card.type === 'WILD DRAW') wildDrawChallenger = movePlayer(playerInTurn, 1)
       const skipsNextPlayer = card.type === 'SKIP' || penalty > 0 || (card.type === 'REVERSE' && players.length === 2)
       const distance = skipsNextPlayer ? 2 : 1
       playerInTurn = hand.size === 0 ? undefined : movePlayer(playerInTurn, distance)

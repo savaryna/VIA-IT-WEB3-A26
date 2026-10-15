@@ -14,30 +14,30 @@ export type Deck = {
   toMemento(): DeckMemento
 }
 
-export function createDeck(initialCards?: Card[]): Deck {
-  const cards =
-    initialCards ??
-    types.flatMap<Card>(type => {
-      switch (type) {
-        case 'NUMBERED':
-          return colors
-            .flatMap(color => numbers.map(number => ({ type, color, number })))
-            .flatMap(card => (card.number === 0 ? [card] : [card, card]))
-        case 'SKIP':
-        case 'REVERSE':
-        case 'DRAW':
-          return colors.map(color => ({ type, color })).flatMap(card => [card, card])
-        default:
-          return colors.map(() => ({ type }))
-      }
-    })
+export function createDeck(initialCards?: readonly Card[]): Deck {
+  const cards = initialCards
+    ? [...initialCards]
+    : types.flatMap<Card>(type => {
+        switch (type) {
+          case 'NUMBERED':
+            return colors
+              .flatMap(color => numbers.map(number => ({ type, color, number })))
+              .flatMap(card => (card.number === 0 ? [card] : [card, card]))
+          case 'SKIP':
+          case 'REVERSE':
+          case 'DRAW':
+            return colors.map(color => ({ type, color })).flatMap(card => [card, card])
+          default:
+            return colors.map(() => ({ type }))
+        }
+      })
 
   return {
     get size() {
       return cards.length
     },
     add(card) {
-      cards.unshift(card)
+      cards.unshift({ ...card })
     },
     top() {
       return cards.at(0)
@@ -52,7 +52,7 @@ export function createDeck(initialCards?: Card[]): Deck {
       return createDeck(cards.filter(card => predicate(card)))
     },
     toMemento() {
-      return cards
+      return cards.map(card => ({ ...card }))
     },
   }
 }
