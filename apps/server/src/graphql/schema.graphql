@@ -1,0 +1,108 @@
+enum RoomStatus {
+  waiting
+  playing
+  between
+  finished
+}
+enum Direction {
+  clockwise
+  counterclockwise
+}
+
+enum GameMode {
+  round
+  score
+}
+enum ActionType {
+  play
+  draw
+  sayUno
+  catchUnoFailure
+  challenge
+}
+enum CardColor {
+  RED
+  GREEN
+  BLUE
+  YELLOW
+}
+type Card {
+  type: String!
+  color: CardColor
+  number: Int
+}
+type Player {
+  connected: Boolean!
+  name: String!
+  cardCount: Int!
+  score: Int!
+}
+type Member {
+  connected: Boolean!
+  userId: ID!
+  name: String!
+  score: Int!
+}
+type ChallengeResult {
+  offender: Int!
+  guilty: Boolean!
+  hand: [Card!]!
+}
+type Round {
+  players: [Player!]!
+  hand: [Card!]!
+  playableCardIndices: [Int!]!
+  turn: Int
+  discardTop: Card!
+  color: CardColor!
+  direction: Direction!
+  drawPileSize: Int!
+  mustPlayDrawn: Boolean!
+  declaredUno: Boolean!
+  canSayUno: Boolean!
+  catchablePlayer: Int
+  challengeResult: ChallengeResult
+  canChallenge: Boolean!
+  winner: Int
+  score: Int
+  gameWinner: Int
+}
+type Room {
+  id: ID!
+  ownerId: ID!
+  status: RoomStatus!
+  mode: GameMode!
+  targetScore: Int!
+  capacity: Int!
+  roundNumber: Int!
+  version: Int!
+  localPlayer: Int!
+  members: [Member!]!
+  round: Round
+}
+input CreateRoomInput {
+  mode: GameMode! = round
+  targetScore: Int! = 500
+  capacity: Int! = 2
+}
+input ActionInput {
+  type: ActionType!
+  cardIndex: Int
+  newColor: CardColor
+  sayUno: Boolean
+  accused: Int
+}
+type Query {
+  myRooms: [Room!]!
+  room(id: ID!): Room!
+}
+type Mutation {
+  createRoom(input: CreateRoomInput!): Room!
+  joinRoom(id: ID!): Room!
+  startGame(id: ID!, version: Int!): Room!
+  takeAction(id: ID!, version: Int!, action: ActionInput!): Room!
+  nextRound(id: ID!, version: Int!): Room!
+}
+type Subscription {
+  roomChanged(id: ID!): Room!
+}

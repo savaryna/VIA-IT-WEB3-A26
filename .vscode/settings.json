@@ -1,4 +1,8 @@
 {
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "files.readonlyInclude": {
+    "apps/server/drizzle/**": true,
+    "apps/server/src/db/schema/auth.ts": true
+  }
 }

@@ -1,0 +1,41 @@
+{
+  "name": "@uno/server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "check": "tsc --noEmit",
+    "auth:generate": "pnpm dlx auth@1.7.10 generate --config ./src/auth/index.ts --output ./src/db/schema/auth.ts --yes && oxfmt src/db/schema/auth.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts"
+  },
+  "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "@as-integrations/express5": "^1.1.2",
+    "@better-auth/drizzle-adapter": "^1.7.10",
+    "@graphql-tools/schema": "^10.1.5",
+    "@uno/engine": "workspace:*",
+    "better-auth": "^1.7.10",
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "drizzle-orm": "^0.45.4",
+    "express": "^5",
+    "graphql": "^16",
+    "graphql-subscriptions": "^3.0.0",
+    "graphql-ws": "^6.4.0",
+    "ws": "^8.22.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5",
+    "@types/node": "^26",
+    "@types/ws": "^8.18.2",
+    "drizzle-kit": "^0.31.11",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3"
+  }
+}
