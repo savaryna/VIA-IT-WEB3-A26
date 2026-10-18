@@ -1,0 +1,185 @@
+.play-screen {
+  --table-spacing: clamp(0.75rem, 2dvh, 1.75rem);
+  --table-card-width: clamp(4rem, min(10vw, 15dvh), 10rem);
+  --hand-card-width: var(--table-card-width);
+  --discard-card-width: var(--table-card-width);
+  --avatar-size: clamp(2.25rem, 6dvh, 4.5rem);
+  min-height: 100dvh;
+  display: flex;
+  padding: var(--table-spacing);
+  background: #f8f9fa;
+}
+.table {
+  --side-column-width: clamp(14rem, 22vw, 18rem);
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-areas: 'opponents opponents opponents' 'center center center' 'hand hand draw' 'controls controls controls';
+  grid-template-columns: var(--side-column-width) minmax(0, 1fr) var(--side-column-width);
+  grid-template-rows: auto minmax(min-content, 1fr) auto auto;
+  align-items: end;
+  gap: var(--table-spacing);
+}
+.opponents {
+  position: relative;
+  grid-area: opponents;
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  align-self: start;
+}
+.opponents > .seat {
+  width: min(30%, 24rem);
+}
+.opponents > .seat:only-of-type {
+  margin-inline: auto;
+}
+.table-center {
+  grid-area: center;
+  align-self: center;
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+}
+.game-controls {
+  grid-area: controls;
+  display: flex;
+  align-items: center;
+  gap: var(--table-spacing);
+}
+.game-controls .round-actions {
+  width: var(--hand-card-width);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.game-controls .player-details p {
+  white-space: nowrap;
+}
+.round-number {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  translate: -50% 50%;
+  margin: 0;
+  padding-inline: 1rem;
+  background: #050505;
+  white-space: nowrap;
+}
+.round-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+.play-screen .round-actions button {
+  flex: 1;
+}
+.table > .player-hand {
+  grid-area: hand;
+}
+.table > .draw-pile {
+  grid-area: draw;
+  justify-self: end;
+}
+@media (max-width: 1000px) {
+  .play-screen {
+    --discard-card-width: calc(var(--table-card-width) * 2);
+  }
+}
+@media (max-width: 1000px) and (min-height: 800px) and (orientation: portrait) {
+  .play-screen {
+    --hand-card-width: calc(var(--table-card-width) * 1.5);
+  }
+  .player-hand .card-symbol {
+    font-size: calc(var(--hand-card-width) * 0.45);
+  }
+  .player-hand .card-corner {
+    font-size: calc(var(--hand-card-width) * 0.14);
+  }
+  .draw-pile .card-back {
+    font-size: calc(var(--hand-card-width) * 0.25);
+  }
+}
+@media (max-width: 700px) {
+  .table {
+    grid-template-areas: 'opponents opponents' 'center center' 'hand draw' 'controls controls';
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .opponents {
+    gap: 0.5rem;
+  }
+  .player-identity {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .opponents .player-details strong {
+    font-size: 0.9rem;
+  }
+  .opponents .player-details p {
+    font-size: 0.75rem;
+  }
+  .opponent-hand {
+    margin-top: 0.5rem;
+    --card-width: 2.25rem;
+  }
+  .color-picker {
+    gap: 0.5rem;
+  }
+  .color-options {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .play-screen {
+    --table-card-width: clamp(3.5rem, min(10vw, 12dvh), 10rem);
+  }
+}
+
+.discard-stage {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: clamp(1rem, 3vw, 3rem);
+  width: 100%;
+  height: calc(var(--discard-card-width) * 1.5);
+}
+.discard-stage-pile {
+  position: relative;
+  justify-self: center;
+  height: 100%;
+}
+.choosing-color {
+  grid-template-columns: minmax(0, 1fr);
+}
+.choosing-color > :first-child,
+.choosing-color > :last-child {
+  display: none;
+}
+.choosing-color .discard-stage-pile {
+  width: min(100%, 38rem);
+}
+@media (max-width: 700px) {
+  .discard-stage {
+    gap: 0.65rem;
+  }
+}
+
+/* Reserve space even when no contextual controls are visible. */
+.discard-status {
+  height: 3rem;
+  width: min(100%, 28rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  text-align: center;
+}
+.discard-status > * {
+  flex-shrink: 0;
+}
+
+.uno-action {
+  position: relative;
+  flex: 1;
+  display: grid;
+}

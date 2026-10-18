@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist+Pixel:ELSH@1&display=swap');
+@import './base.css';
+@import './cards.css';
+@import './table.css';
+@import './setup.css';
+@import './player-hand.css';
+@import './seat.css';
+@import './opponent-hand.css';
+@import './theme.css';
+@import './particle.css';
+@import './wave.css';
+@import './select-field.css';
+@import './room-list.css';
+@import './discard-pile.css';
+@import './direction-orbit.css';

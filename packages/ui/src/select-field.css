@@ -1,0 +1,33 @@
+.select-field {
+  position: relative;
+}
+.select-field select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 2.5rem;
+}
+.select-field::after {
+  content: '';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  translate: 0 -50%;
+  width: 0.75rem;
+  height: 0.5rem;
+  background: currentColor;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 33%,
+    75% 33%,
+    75% 66%,
+    60% 66%,
+    60% 100%,
+    40% 100%,
+    40% 66%,
+    25% 66%,
+    25% 33%,
+    0 33%
+  );
+  pointer-events: none;
+}

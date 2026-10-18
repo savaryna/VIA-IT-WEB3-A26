@@ -1,0 +1,105 @@
+fragment RoomFields on Room {
+  id
+  ownerId
+  status
+  mode
+  targetScore
+  capacity
+  roundNumber
+  version
+  localPlayer
+  members {
+    userId
+    name
+    connected
+    score
+  }
+  round {
+    players {
+      name
+      connected
+      cardCount
+      score
+    }
+    hand {
+      type
+      color
+      number
+    }
+    playableCardIndices
+    turn
+    discardTop {
+      type
+      color
+      number
+    }
+    color
+    direction
+    drawPileSize
+    mustPlayDrawn
+    declaredUno
+    canSayUno
+    catchablePlayer
+    challengeResult {
+      offender
+      guilty
+      hand {
+        type
+        color
+        number
+      }
+    }
+    canChallenge
+    winner
+    score
+    gameWinner
+  }
+}
+
+query MyRooms {
+  myRooms {
+    ...RoomFields
+  }
+}
+
+query Room($id: ID!) {
+  room(id: $id) {
+    ...RoomFields
+  }
+}
+
+subscription RoomChanged($id: ID!) {
+  roomChanged(id: $id) {
+    ...RoomFields
+  }
+}
+
+mutation CreateRoom($input: CreateRoomInput!) {
+  createRoom(input: $input) {
+    ...RoomFields
+  }
+}
+
+mutation JoinRoom($id: ID!) {
+  joinRoom(id: $id) {
+    ...RoomFields
+  }
+}
+
+mutation StartGame($id: ID!, $version: Int!) {
+  startGame(id: $id, version: $version) {
+    ...RoomFields
+  }
+}
+
+mutation TakeAction($id: ID!, $version: Int!, $action: ActionInput!) {
+  takeAction(id: $id, version: $version, action: $action) {
+    ...RoomFields
+  }
+}
+
+mutation NextRound($id: ID!, $version: Int!) {
+  nextRound(id: $id, version: $version) {
+    ...RoomFields
+  }
+}

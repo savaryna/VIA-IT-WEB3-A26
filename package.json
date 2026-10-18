@@ -16,6 +16,7 @@
   "type": "module",
   "scripts": {
     "dev:server": "pnpm --filter @uno/server dev",
+    "dev:client": "pnpm --filter @uno/vue dev",
     "test": "vitest",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
@@ -28,7 +29,9 @@
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^7.4.6",
+    "@graphql-codegen/typed-document-node": "^7.2.0",
     "@graphql-codegen/typescript": "^6.1.2",
+    "@graphql-codegen/typescript-operations": "^6.1.10",
     "@graphql-codegen/typescript-resolvers": "^6.1.1",
     "oxfmt": "^0.66.0",
     "oxlint": "^1.81.0",

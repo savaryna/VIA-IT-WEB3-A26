@@ -1,0 +1,22 @@
+.discard-card-slap {
+  animation: discard-slap 300ms steps(5, end);
+  transform-origin: center;
+}
+@keyframes discard-slap {
+  0% {
+    opacity: 0.4;
+    transform: scale(1.2) rotate(-10deg);
+  }
+  45% {
+    opacity: 0.8;
+    transform: scale(1.05) rotate(4deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.97) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}

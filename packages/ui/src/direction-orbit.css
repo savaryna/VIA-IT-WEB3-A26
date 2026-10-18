@@ -1,0 +1,11 @@
+.direction-orbit {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--card-color);
+  opacity: 0.045;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: -2;
+}

@@ -1,0 +1,43 @@
+.particle {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+  left: 50%;
+  top: 35%;
+  color: #fff;
+  font-size: clamp(5rem, 11vw, 10rem);
+  line-height: 1;
+  letter-spacing: -0.08em;
+  white-space: nowrap;
+  text-shadow:
+    calc(4px * var(--shadow-direction)) 4px 0 #555,
+    calc(-2px * var(--shadow-direction)) -2px 0 #000,
+    calc(2px * var(--shadow-direction)) -2px 0 #000,
+    calc(-2px * var(--shadow-direction)) 2px 0 #000;
+  animation: particle 700ms steps(9, end) forwards;
+}
+.particle.wide-symbol {
+  font-size: clamp(3rem, 7vw, 6rem);
+}
+@keyframes particle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) rotate(-16deg) scale(0.45);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -30%) rotate(-12deg) scale(1.2);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-45%, -60%) rotate(-8deg) scale(1);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-40%, -115%) rotate(-10deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-30%, -190%) rotate(-14deg) scale(0.85);
+  }
+}

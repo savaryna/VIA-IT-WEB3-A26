@@ -1,0 +1,55 @@
+.room-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(100%, 27rem);
+}
+.centered-screen .room-list {
+  display: block;
+  width: min(100%, 27rem);
+  max-height: 18rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #777 #080808;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #444;
+  background: #080808;
+  list-style: none;
+}
+.room-list-row {
+  display: grid;
+  grid-template-columns: 3ch minmax(0, 1fr) 4.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  line-height: 1.6;
+}
+.room-list-row + .room-list-row {
+  border-top: 1px dashed #333;
+}
+.room-list-number,
+.room-list-mode,
+.room-list-status {
+  color: #999;
+  font-size: 0.75rem;
+}
+.room-list-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.room-list-status {
+  text-transform: capitalize;
+}
+@media (max-width: 480px) {
+  .room-list-row {
+    grid-template-columns: 2.5ch minmax(0, 1fr) 3.5rem minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}

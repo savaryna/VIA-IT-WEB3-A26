@@ -1,0 +1,105 @@
+.uno-card,
+.card-back {
+  flex: 0 0 auto;
+  width: var(--card-width, 8rem);
+  aspect-ratio: 2 / 3;
+  border: 3px solid #272727;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+.uno-card {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  color: var(--card-color, #272727);
+  font-weight: 800;
+}
+[data-color='RED'] {
+  --card-color: #d42e3b;
+}
+[data-color='BLUE'] {
+  --card-color: #1767c2;
+}
+[data-color='GREEN'] {
+  --card-color: #208242;
+}
+[data-color='YELLOW'] {
+  --card-color: #947000;
+}
+.card-symbol {
+  font-size: clamp(1.25rem, 3vw, 3rem);
+}
+.card-corner {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  font-size: 0.9rem;
+}
+.uno-card:disabled {
+  color: var(--card-color, #272727);
+  opacity: 1;
+}
+button.uno-card:not(:disabled):is(:hover, :focus-visible) {
+  outline: 3px solid #272727;
+  outline-offset: 2px;
+}
+.card-back {
+  display: block;
+}
+.discard-pile {
+  --card-width: clamp(7rem, 10vw, 11rem);
+}
+.discard-pile .uno-card {
+  border-color: var(--card-color, #272727);
+}
+.draw-pile {
+  text-align: center;
+  --card-width: clamp(6rem, 10vw, 10rem);
+}
+.draw-pile .card-back {
+  color: #fff;
+  background: #383838;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 2vw, 2.5rem);
+}
+.draw-pile p {
+  margin: 0.5rem 0 0;
+  font-weight: 700;
+}
+.color-picker {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: 100%;
+  height: 100%;
+  align-items: center;
+  gap: 1rem;
+  width: min(100%, 38rem);
+  padding: 0;
+  border: 0;
+  margin: 0;
+}
+.color-options {
+  display: grid;
+  gap: 1rem;
+}
+.color-options button {
+  padding: 1rem 0.5rem;
+  color: var(--card-color);
+  font-weight: 700;
+}
+.wild-preview {
+  --card-width: clamp(7rem, 10vw, 11rem);
+}
+.wild-preview,
+.discard-pile {
+  display: flex;
+}
+.cancel-color {
+  position: absolute;
+  top: calc(100% + var(--discard-status-gap));
+  left: 50%;
+  translate: -50% 0;
+}

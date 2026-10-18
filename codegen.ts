@@ -16,6 +16,11 @@ const config: CodegenConfig = {
         mappers: { Room: '../rooms/service#RoomView' },
       },
     },
+    'apps/vue/src/graphql/generated.ts': {
+      documents: 'apps/vue/src/graphql/rooms.graphql',
+      plugins: ['typescript-operations', 'typed-document-node'],
+      config: { enumsAsTypes: true, useTypeImports: true },
+    },
   },
 }
 export default config

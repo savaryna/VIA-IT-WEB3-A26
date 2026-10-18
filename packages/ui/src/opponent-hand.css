@@ -1,0 +1,27 @@
+.opponent-hand {
+  display: flex;
+  margin-top: clamp(0.5rem, 1dvh, 1rem);
+  overflow-x: auto;
+  --card-width: clamp(1.5rem, min(4.5vw, 7dvh), 5rem);
+}
+.opponent-hand > * + * {
+  margin-left: calc(var(--card-width) * -0.45);
+}
+
+.opponent-hand.revealed > .uno-card {
+  animation: reveal-opponent-card 200ms steps(4, end) both;
+}
+.opponent-hand .card-symbol {
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+}
+.opponent-hand .card-corner {
+  font-size: clamp(0.5rem, 0.9vw, 0.75rem);
+}
+@keyframes reveal-opponent-card {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
