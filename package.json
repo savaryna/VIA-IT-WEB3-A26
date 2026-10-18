@@ -1,6 +1,7 @@
 {
   "name": "uno",
   "version": "0.0.1",
+  "private": true,
   "description": "UNO",
   "keywords": [
     "functional",
@@ -13,19 +14,23 @@
     "Alexandru Tofan"
   ],
   "type": "module",
-  "main": "index.js",
   "scripts": {
     "test": "vitest",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit && pnpm -r --if-present run check",
+    "build": "pnpm -r --if-present run build"
   },
   "devDependencies": {
     "oxfmt": "^0.66.0",
     "oxlint": "^1.81.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
-  }
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "pnpm@11.22.0"
 }

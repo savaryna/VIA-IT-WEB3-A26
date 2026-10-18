@@ -1,0 +1,23 @@
+{
+  "name": "@uno/engine",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared UNO domain and object-oriented game engine",
+  "files": [
+    "src"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./oo": "./src/oo/index.ts",
+    "./schemas": "./src/schemas.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}
